@@ -14,6 +14,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import LikeFavBar from "@/components/common/LikeFavBar";
 import FollowButton from "@/components/common/FollowButton";
+import CommentSection from "@/components/comment/CommentSection";
 
 const CourseDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -338,6 +339,8 @@ const CourseDetailPage = () => {
             </div>
           </aside>
         </div>
+
+        <CommentSection postId={id ?? ""} />
 
         {previewOpen && detail?.images?.length ? (
           <div className={styles.previewOverlay} onClick={() => setPreviewOpen(false)}>
