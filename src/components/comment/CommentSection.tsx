@@ -7,9 +7,9 @@ import styles from "./CommentSection.module.css";
 
 type OptimisticItem = CommentItem & { __optimistic?: true };
 
-const toOptimistic = (pendingCommentId: number, creatorId: number, body: string): OptimisticItem => ({
+const toOptimistic = (pendingCommentId: string, creatorId: string, body: string): OptimisticItem => ({
   commentId: pendingCommentId,
-  postId: 0,
+  postId: "0",
   rootId: null,
   parentId: null,
   creatorId,
@@ -20,6 +20,7 @@ const toOptimistic = (pendingCommentId: number, creatorId: number, body: string)
   replyCount: 0,
   createTime: new Date().toISOString(),
   updateTime: new Date().toISOString(),
+  liked: false,
   __optimistic: true
 });
 
@@ -31,7 +32,7 @@ const CommentSection = ({ postId }: { postId: string }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
-  const cursorRef = useRef<{ createTime: string | null; commentId: number | null }>({
+  const cursorRef = useRef<{ createTime: string | null; commentId: string | null }>({
     createTime: null,
     commentId: null
   });
@@ -39,6 +40,13 @@ const CommentSection = ({ postId }: { postId: string }) => {
   const loadingRef = useRef(false);
   // 卸载守卫：异步请求 resolve 时组件可能已卸载
   const mountedRef = useRef(true);
+  // 点赞操作同步守卫（防止同一评论连点竞态）
+  const likingRef = useRef<Set<string>>(new Set());
+  // 删除操作同步守卫
+  const deletingRef = useRef<Set<string>>(new Set());
+  // 操作中 commentId（驱动按钮 disabled 渲染；ref 不触发 re-render 故另存 state）
+  const [likingIds, setLikingIds] = useState<Set<string>>(new Set());
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
   const [input, setInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -118,13 +126,64 @@ const CommentSection = ({ postId }: { postId: string }) => {
     try {
       const resp = await commentService.submit(postId, body, accessToken);
       if (!mountedRef.current) return;
-      setItems(prev => [toOptimistic(resp.pendingCommentId, user?.id ?? 0, body), ...prev]);
+      setItems(prev => [toOptimistic(resp.pendingCommentId, String(user?.id ?? 0), body), ...prev]);
       setInput("");
     } catch (e) {
       if (!mountedRef.current) return;
       setSubmitError(e instanceof ApiError ? e.message : "发送失败");
     } finally {
       if (mountedRef.current) setSubmitting(false);
+    }
+  };
+
+  const handleLike = async (commentId: string) => {
+    if (!accessToken || likingRef.current.has(commentId)) return;
+    const target = items.find(i => i.commentId === commentId);
+    if (!target || target.__optimistic || target.deleted) return;
+    likingRef.current.add(commentId);
+    setLikingIds(prev => new Set(prev).add(commentId));
+    const wasLiked = target.liked;
+    try {
+      const resp = wasLiked
+        ? await commentService.unlike(commentId, accessToken)
+        : await commentService.like(commentId, accessToken);
+      if (!mountedRef.current) return;
+      // changed=true 才翻转本地 liked + ±1 计数；changed=false 保持后端初始值
+      if (resp.changed) {
+        setItems(prev => prev.map(i =>
+          i.commentId === commentId
+            ? { ...i, liked: !wasLiked, likeCount: Math.max(0, i.likeCount + (wasLiked ? -1 : 1)) }
+            : i
+        ));
+      }
+    } catch {
+      // 静默失败，不翻转本地态
+    } finally {
+      likingRef.current.delete(commentId);
+      setLikingIds(prev => { const n = new Set(prev); n.delete(commentId); return n; });
+    }
+  };
+
+  const handleDelete = async (commentId: string) => {
+    if (!accessToken || deletingRef.current.has(commentId)) return;
+    const target = items.find(i => i.commentId === commentId);
+    if (!target || target.__optimistic || target.deleted) return;
+    deletingRef.current.add(commentId);
+    setDeletingIds(prev => new Set(prev).add(commentId));
+    try {
+      await commentService.delete(commentId, accessToken);
+      if (!mountedRef.current) return;
+      // 软删除：本地 body 改 [deleted] + deleted=true，不移除（与后端一致）
+      setItems(prev => prev.map(i =>
+        i.commentId === commentId
+          ? { ...i, deleted: true, body: "[deleted]" }
+          : i
+      ));
+    } catch {
+      // 静默忽略（非作者/不存在/网络）
+    } finally {
+      deletingRef.current.delete(commentId);
+      setDeletingIds(prev => { const n = new Set(prev); n.delete(commentId); return n; });
     }
   };
 
@@ -187,6 +246,30 @@ const CommentSection = ({ postId }: { postId: string }) => {
                 </div>
                 <div className={styles.itemMeta}>
                   <span>{new Date(item.createTime).toLocaleString("zh-CN")}</span>
+                  {!item.__optimistic && !item.deleted ? (
+                    <button
+                      type="button"
+                      className={`${styles.likeBtn} ${item.liked ? styles.liked : ""}`}
+                      onClick={() => handleLike(item.commentId)}
+                      disabled={likingIds.has(item.commentId)}
+                      aria-pressed={item.liked}
+                      aria-label={item.liked ? "取消点赞" : "点赞"}
+                    >
+                      <span>{item.liked ? "♥" : "♡"}</span>
+                      <span className={styles.likeCount}>{item.likeCount}</span>
+                    </button>
+                  ) : null}
+                  {!item.__optimistic && !item.deleted && item.creatorId === String(user?.id) ? (
+                    <button
+                      type="button"
+                      className={styles.deleteBtn}
+                      onClick={() => handleDelete(item.commentId)}
+                      disabled={deletingIds.has(item.commentId)}
+                      aria-label="删除评论"
+                    >
+                      删除
+                    </button>
+                  ) : null}
                 </div>
               </div>
             ))}

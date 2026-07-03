@@ -1,5 +1,5 @@
 import { apiFetch } from "./apiClient";
-import type { CommentPage, CommentSubmitResponse, CommentListParams } from "@/types/comment";
+import type { CommentPage, CommentSubmitResponse, CommentLikeResponse, CommentListParams } from "@/types/comment";
 
 const PREFIX = "/api/v1";
 
@@ -21,11 +21,28 @@ export const commentService = {
       {
         method: "POST",
         body: {
-          postId: Number(postId),
           clientRequestId: crypto.randomUUID(),
           body
         },
         accessToken
       }
+    ),
+
+  like: (commentId: string, accessToken: string) =>
+    apiFetch<CommentLikeResponse>(
+      `${PREFIX}/comments/${commentId}/like`,
+      { method: "POST", accessToken }
+    ),
+
+  unlike: (commentId: string, accessToken: string) =>
+    apiFetch<CommentLikeResponse>(
+      `${PREFIX}/comments/${commentId}/like`,
+      { method: "DELETE", accessToken }
+    ),
+
+  delete: (commentId: string, accessToken: string) =>
+    apiFetch<void>(
+      `${PREFIX}/comments/${commentId}`,
+      { method: "DELETE", accessToken }
     )
 };
