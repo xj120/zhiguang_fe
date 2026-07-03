@@ -41,6 +41,37 @@
   gap: 20px;
 }
 
+.tabs {
+  display: flex;
+  gap: 8px;
+  background: rgba(255, 249, 240, 0.6);
+  border-radius: 16px;
+  padding: 4px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab:hover {
+  color: var(--color-primary-strong);
+}
+
+.tabActive {
+  background: #fff;
+  color: var(--color-primary-strong);
+  box-shadow: 0 4px 12px rgba(255, 138, 65, 0.16);
+}
+
 .field {
   display: flex;
   flex-direction: column;
@@ -61,6 +92,17 @@
   box-shadow: inset 0 0 0 1px rgba(255, 138, 65, 0.16);
   font-size: 15px;
   color: var(--color-text-strong);
+}
+
+.select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ff7a22' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  padding-right: 40px;
 }
 
 .codeRow {
