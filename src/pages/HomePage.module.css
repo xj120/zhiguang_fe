@@ -2,6 +2,32 @@
   margin-bottom: 24px;
 }
 
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tab {
+  padding: 6px 16px;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  color: #555;
+}
+
+.tab:hover {
+  border-color: #bbb;
+}
+
+.tabActive {
+  background: #333;
+  color: #fff;
+  border-color: #333;
+}
+
 .masonry {
   column-count: 4;
   column-gap: 24px;

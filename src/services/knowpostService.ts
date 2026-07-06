@@ -87,6 +87,18 @@ export const knowpostService = {
     apiFetch<FeedResponse>(`${KNOWPOST_PREFIX}/feed?page=${page}&size=${size}`)
   ,
 
+  // 关注 Feed（需鉴权）。cursor 游标翻页：首次传 null，后续传上次响应的 nextCursor
+  followFeed: (cursor: string | null, accessToken: string) => {
+    const usp = new URLSearchParams();
+    if (cursor) usp.set("cursor", cursor);
+    const qs = usp.toString();
+    return apiFetch<FeedResponse>(
+      `${KNOWPOST_PREFIX}/feed/follow${qs ? `?${qs}` : ""}`,
+      { accessToken }
+    );
+  }
+  ,
+
   // 获取我的知文（需鉴权）
   mine: (page = 1, size = 20, accessToken: string) =>
     apiFetch<FeedResponse>(`${KNOWPOST_PREFIX}/mine?page=${page}&size=${size}`, {

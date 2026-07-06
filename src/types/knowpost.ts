@@ -59,6 +59,8 @@ export type FeedResponse = {
   page: number;
   size: number;
   hasMore: boolean;
+  // followFeed 返回时：page 恒 1、size 恒 FOLLOW_FEED_SIZE 是后端占位，关注 tab 只用 items/hasMore/nextCursor
+  nextCursor?: string;
 };
 
 // 知文详情数据结构
