@@ -104,3 +104,18 @@ export type CounterResponse = {
     fav: number;
   };
 };
+
+// 发布受理响应（POST /{id}/publish、POST /{id}/publish/{attemptId}/retry）
+// publishAttemptId 是 snowflake 64 位，String 序列化防 JS 精度丢失
+export type PublishAcceptedResponse = {
+  publishAttemptId: string;
+};
+
+// 发布状态查询响应（GET /{id}/publish/status?attemptId=）
+export type PublishStatusResponse = {
+  publishAttemptId: string;
+  attemptStatus: "publishing" | "succeeded" | "failed";
+  postStatus: "publishing" | "published" | "publish_failed";
+  failedStep: string | null;
+  retryable: boolean;
+};

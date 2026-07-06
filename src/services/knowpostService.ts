@@ -10,6 +10,8 @@ import type {
   LikeActionResponse,
   FavActionResponse,
   CounterResponse,
+  PublishAcceptedResponse,
+  PublishStatusResponse,
   VisibleScope
 } from "@/types/knowpost";
 
@@ -29,8 +31,29 @@ export const knowpostService = {
   update: (id: string, payload: UpdateKnowPostRequest) =>
     apiFetch<void>(`${KNOWPOST_PREFIX}/${id}`, { method: "PATCH", body: payload }),
 
-  publish: (id: string) =>
-    apiFetch<void>(`${KNOWPOST_PREFIX}/${id}/publish`, { method: "POST" })
+  // 发布（需鉴权）。body 必须含 idempotentKey（后端 @NotBlank），返回 publishAttemptId
+  publish: (id: string, idempotentKey: string, accessToken: string) =>
+    apiFetch<PublishAcceptedResponse>(`${KNOWPOST_PREFIX}/${id}/publish`, {
+      method: "POST",
+      body: { idempotentKey },
+      accessToken
+    })
+  ,
+
+  // 查询发布状态（需鉴权）。attemptId 来自 publish/retryPublish 返回值，全程不变
+  publishStatus: (id: string, attemptId: string, accessToken: string) =>
+    apiFetch<PublishStatusResponse>(
+      `${KNOWPOST_PREFIX}/${id}/publish/status?attemptId=${attemptId}`,
+      { accessToken }
+    )
+  ,
+
+  // 重试发布（需鉴权）。复用同一 attemptId 原地重启（后端 retry_count+1、failedStep 清空）；无 body
+  retryPublish: (id: string, attemptId: string, accessToken: string) =>
+    apiFetch<PublishAcceptedResponse>(
+      `${KNOWPOST_PREFIX}/${id}/publish/${attemptId}/retry`,
+      { method: "POST", accessToken }
+    )
   ,
   
   // 设置置顶（需鉴权）

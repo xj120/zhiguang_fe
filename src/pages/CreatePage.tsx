@@ -7,10 +7,12 @@ import { useRef, useState } from "react";
 import { knowpostService, uploadToPresigned, computeSha256 } from "@/services/knowpostService";
 import AuthStatus from "@/features/auth/AuthStatus";
 import { useAuth } from "@/context/AuthContext";
+import { usePublishStatus } from "@/hooks/usePublishStatus";
 import styles from "./CreatePage.module.css";
 
 const CreatePage = () => {
   const { user, tokens } = useAuth();
+  const publishStatus = usePublishStatus(tokens?.accessToken);
   const [type, setType] = useState("图文");
   const [tags, setTags] = useState<string[]>([]);
   const [title, setTitle] = useState("");
@@ -132,12 +134,38 @@ const CreatePage = () => {
         description: description || undefined
       });
 
-      // 5) 发布
-      await knowpostService.publish(id);
-      setMessage("发布成功 ✅");
+      // 5) 发布（异步：hook 拿 attemptId 后轮询 publishStatus，UI 按 phase 渲染）
+      if (!tokens?.accessToken) {
+        setError("请先登录后再发布");
+        setSubmitting(false);
+        return;
+      }
+      setMessage(null);
+      setError(null);
+      await publishStatus.start(id);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "发布失败";
       setError(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // 发布态文案映射（failedStep 来自后端：stuck_publishing / critical_publish）
+  const failedStepText = (step: string | null) => {
+    if (step === "stuck_publishing") return "发布超时，可重试";
+    if (step === "critical_publish") return "发布失败";
+    return step ? "发布失败" : "发布失败";
+  };
+
+  const handleRetry = async () => {
+    if (!tokens?.accessToken) return;
+    setError(null);
+    setSubmitting(true);
+    try {
+      await publishStatus.retry();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "重试失败");
     } finally {
       setSubmitting(false);
     }
@@ -340,12 +368,55 @@ const CreatePage = () => {
           </div>
         </div>
         <div className={styles.actions}>
-          <button type="button" className={styles.submit} onClick={handlePublish} disabled={submitting}>
-            {submitting ? "发布中…" : "发布"}
+          <button
+            type="button"
+            className={styles.submit}
+            onClick={handlePublish}
+            disabled={submitting || publishStatus.phase === "publishing"}
+          >
+            {submitting || publishStatus.phase === "publishing" ? "发布中…" : "发布"}
           </button>
         </div>
         {error ? <div className={styles.error}>{error}</div> : null}
         {message ? <div className={styles.success}>{message}</div> : null}
+        {publishStatus.phase === "publishing" ? (
+          <div className={styles.success}>发布中…</div>
+        ) : null}
+        {publishStatus.phase === "succeeded" ? (
+          <div className={styles.success}>
+            发布成功 ✅ <a href={`/post/${postId ?? ""}`}>查看详情</a> · <a href="/profile">我的知文</a>
+          </div>
+        ) : null}
+        {publishStatus.phase === "failed" ? (
+          <div className={styles.error}>
+            {failedStepText(publishStatus.failedStep)}
+            {publishStatus.retryable ? (
+              <button
+                type="button"
+                className={styles.submit}
+                onClick={handleRetry}
+                disabled={submitting}
+                style={{ marginLeft: 12 }}
+              >
+                {submitting ? "重试中…" : "重试"}
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+        {publishStatus.phase === "timeout" ? (
+          <div className={styles.error}>
+            发布时间较长，请稍后在<a href="/profile">我的知文</a>查看
+            <button
+              type="button"
+              className={styles.submit}
+              onClick={handleRetry}
+              disabled={submitting}
+              style={{ marginLeft: 12 }}
+            >
+              {submitting ? "重试中…" : "重试"}
+            </button>
+          </div>
+        ) : null}
         {previewUrl ? (
           <div className={styles.previewOverlay} onClick={() => setPreviewUrl(null)}>
             <img src={previewUrl} className={styles.previewImage} alt="预览" />
