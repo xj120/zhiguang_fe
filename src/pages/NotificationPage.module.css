@@ -1,0 +1,127 @@
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.markAllBtn {
+  padding: 4px 12px;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  color: #555;
+}
+
+.markAllBtn:hover {
+  border-color: #bbb;
+}
+
+.markAllBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  font-size: 14px;
+  color: #333;
+  transition: background 0.15s;
+}
+
+.item:hover {
+  background: #f5f5f5;
+}
+
+.unread {
+  background: #f0f7ff;
+  font-weight: 600;
+}
+
+.read {
+  color: #888;
+  font-weight: 400;
+}
+
+.dot {
+  width: 14px;
+  color: #1a73e8;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.time {
+  color: #aaa;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.loading {
+  padding: 16px;
+  text-align: center;
+  color: #888;
+}
+
+.empty {
+  padding: 40px 16px;
+  text-align: center;
+  color: #aaa;
+}
+
+.error {
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  background: #fff0f0;
+  color: #c00;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.moreWrap {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.moreBtn {
+  padding: 6px 20px;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  color: #555;
+}
+
+.moreBtn:hover {
+  border-color: #bbb;
+}
