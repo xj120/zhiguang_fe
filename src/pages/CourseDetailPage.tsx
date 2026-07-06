@@ -14,6 +14,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import LikeFavBar from "@/components/common/LikeFavBar";
 import FollowButton from "@/components/common/FollowButton";
+import ReportDialog from "@/components/common/ReportDialog";
 import CommentSection from "@/components/comment/CommentSection";
 
 const CourseDetailPage = () => {
@@ -23,6 +24,7 @@ const CourseDetailPage = () => {
   const [detail, setDetail] = useState<KnowpostDetailResponse | null>(null);
   const [activeImage, setActiveImage] = useState(0);
   const [contentText, setContentText] = useState<string>("");
+  const [reportOpen, setReportOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
@@ -234,7 +236,17 @@ const CourseDetailPage = () => {
             {(() => {
               const derivedId = detail?.authorId ?? parseAvatarUserId(detail?.authorAvatar);
               const isSelf = (derivedId && user?.id === derivedId) || (!!detail?.authorNickname && !!user?.nickname && detail.authorNickname === user.nickname);
-              return derivedId && !isSelf ? <FollowButton targetUserId={derivedId} /> : null;
+              // 举报按钮单独判 self：只用 derivedId（去昵称 fallback，宁可显示也别误剥夺举报权）
+              const isSelfForReport = !!(derivedId && user?.id === derivedId);
+              if (!derivedId || isSelf) return null;
+              return (
+                <span className={styles.authorActions}>
+                  <FollowButton targetUserId={derivedId} />
+                  {!!tokens?.accessToken && !isSelfForReport ? (
+                    <button type="button" className={styles.reportBtn} onClick={() => setReportOpen(true)}>举报</button>
+                  ) : null}
+                </span>
+              );
             })()}
           </div>
           <div className={styles.tagList}>
@@ -373,6 +385,15 @@ const CourseDetailPage = () => {
           </div>
         ) : null}
       </article>
+      {detail && tokens?.accessToken ? (
+        <ReportDialog
+          open={reportOpen}
+          onClose={() => setReportOpen(false)}
+          targetType="post"
+          targetId={detail.id}
+          accessToken={tokens.accessToken}
+        />
+      ) : null}
     </AppLayout>
   );
 };

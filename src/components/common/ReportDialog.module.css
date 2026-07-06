@@ -1,0 +1,138 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.closeBtn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #888;
+  font-size: 13px;
+}
+
+.closeBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.body {
+  padding: 16px 20px;
+}
+
+.fieldLabel {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+  margin-top: 12px;
+}
+
+.fieldLabel:first-child {
+  margin-top: 0;
+}
+
+.reasonGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.reasonItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.reasonItem:hover {
+  border-color: #bbb;
+}
+
+.reasonActive {
+  border-color: #1a73e8;
+  background: #f0f7ff;
+}
+
+.textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #1a73e8;
+}
+
+.error {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: #fff0f0;
+  color: #c00;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.footer {
+  padding: 12px 20px 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.submitBtn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 999px;
+  background: #1a73e8;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.submitBtn:disabled {
+  background: #bbb;
+  cursor: not-allowed;
+}
+
+.success {
+  padding: 48px 24px;
+  text-align: center;
+  font-size: 15px;
+  color: #333;
+}
