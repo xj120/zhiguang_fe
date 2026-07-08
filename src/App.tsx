@@ -5,6 +5,7 @@ import CreatePage from "./pages/CreatePage";
 import LearningPage from "./pages/LearningPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotificationPage from "./pages/NotificationPage";
+import PromotionRoomPage from "./pages/PromotionRoomPage";
 import EditProfilePage from "./pages/EditProfilePage";
 import CourseDetailPage from "./pages/CourseDetailPage";
 import LoginPage from "./pages/LoginPage";
@@ -19,6 +20,7 @@ function App() {
       <Route path="/learn" element={<LearningPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/notifications" element={<NotificationPage />} />
+      <Route path="/promotion/:postId" element={<PromotionRoomPage />} />
       <Route path="/profile/edit" element={<EditProfilePage />} />
       <Route path="/post/:id" element={<CourseDetailPage />} />
       <Route path="/login" element={<LoginPage />} />

@@ -1,0 +1,209 @@
+.balanceRow {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #666;
+}
+
+.balanceNum {
+  font-weight: 600;
+  color: #e0245e;
+  font-size: 18px;
+}
+
+.formCard {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 480px;
+}
+
+.formTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.field {
+  margin-bottom: 16px;
+}
+
+.label {
+  display: block;
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.resourceGrid {
+  display: flex;
+  gap: 8px;
+}
+
+.resourceBtn {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.resourceBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.resourceActive {
+  border-color: #1a73e8;
+  background: #f0f7ff;
+  color: #1a73e8;
+  font-weight: 600;
+}
+
+.timeRange, .postId {
+  font-size: 13px;
+  color: #555;
+  padding: 8px 12px;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #1a73e8;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.submitBtn:disabled { background: #bbb; cursor: not-allowed; }
+
+.roomCard {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.roomHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.roomTitle { font-size: 18px; font-weight: 600; }
+
+.windowInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.windowCountdown {
+  font-size: 13px;
+  color: #e0245e;
+  font-weight: 600;
+}
+
+.windowStatus {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #e6f4ea;
+  color: #137333;
+  font-size: 12px;
+}
+
+.rankingSection, .bidSection {
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.rankingList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rankItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.rankMine {
+  border-color: #1a73e8;
+  background: #f0f7ff;
+}
+
+.rankNum { font-weight: 600; min-width: 70px; }
+.rankBid { color: #e0245e; font-weight: 600; }
+.rankMe {
+  margin-left: auto;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #1a73e8;
+  color: #fff;
+  font-size: 11px;
+}
+
+.empty {
+  padding: 24px;
+  text-align: center;
+  color: #aaa;
+  font-size: 13px;
+}
+
+.pending {
+  padding: 8px;
+  text-align: center;
+  color: #e0245e;
+  font-size: 12px;
+}
+
+.bidRow {
+  display: flex;
+  gap: 8px;
+}
+
+.bidInput {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.bidInput:focus { outline: none; border-color: #1a73e8; }
+
+.bidBtn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #e0245e;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bidBtn:disabled { background: #bbb; cursor: not-allowed; }
+
+.error {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #fff0f0;
+  color: #c00;
+  border-radius: 6px;
+  font-size: 12px;
+}

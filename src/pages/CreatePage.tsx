@@ -384,7 +384,7 @@ const CreatePage = () => {
         ) : null}
         {publishStatus.phase === "succeeded" ? (
           <div className={styles.success}>
-            发布成功 ✅ <a href={`/post/${postId ?? ""}`}>查看详情</a> · <a href="/profile">我的知文</a>
+            发布成功 ✅ <a href={`/post/${postId ?? ""}`}>查看详情</a> · <a href="/profile">我的知文</a> · <a href={`/promotion/${postId ?? ""}`}>推广</a>
           </div>
         ) : null}
         {publishStatus.phase === "failed" ? (

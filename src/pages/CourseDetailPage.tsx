@@ -235,10 +235,20 @@ const CourseDetailPage = () => {
             <span className={styles.authorName}>{detail?.authorNickname ?? ""}</span>
             {(() => {
               const derivedId = detail?.authorId ?? parseAvatarUserId(detail?.authorAvatar);
-              const isSelf = (derivedId && user?.id === derivedId) || (!!detail?.authorNickname && !!user?.nickname && detail.authorNickname === user.nickname);
+              const isSelf = (derivedId && String(user?.id) === String(derivedId)) || (!!detail?.authorNickname && !!user?.nickname && detail.authorNickname === user.nickname);
               // 举报按钮单独判 self：只用 derivedId（去昵称 fallback，宁可显示也别误剥夺举报权）
-              const isSelfForReport = !!(derivedId && user?.id === derivedId);
-              if (!derivedId || isSelf) return null;
+              const isSelfForReport = !!(derivedId && String(user?.id) === String(derivedId));
+              if (!derivedId) return null;
+              // 作者本人（只用 derivedId 判 self，去昵称 fallback 防 I1 别名泄漏）：显示"推广"按钮
+              const isSelfForPromote = !!(derivedId && String(user?.id) === String(derivedId));
+              if (isSelfForPromote && detail?.id) {
+                return (
+                  <span className={styles.authorActions}>
+                    <a href={`/promotion/${detail.id}`} className={styles.promoteBtn}>推广</a>
+                  </span>
+                );
+              }
+              // 非作者：FollowButton + 举报
               return (
                 <span className={styles.authorActions}>
                   <FollowButton targetUserId={derivedId} />
