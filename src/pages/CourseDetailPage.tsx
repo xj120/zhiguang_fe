@@ -35,14 +35,6 @@ const CourseDetailPage = () => {
   const [showNavLeft, setShowNavLeft] = useState(false);
   const [showNavRight, setShowNavRight] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
-  // RAG 问答状态
-  const [ragQuestion, setRagQuestion] = useState<string>("");
-  const [ragAnswer, setRagAnswer] = useState<string>("");
-  const [ragLoading, setRagLoading] = useState<boolean>(false);
-  const [ragError, setRagError] = useState<string | null>(null);
-  const ragESRef = useRef<EventSource | null>(null);
-  const [ragTopK, setRagTopK] = useState<number>(5);
-  const [ragMaxTokens, setRagMaxTokens] = useState<number>(1024);
   // 从头像 URL 推断作者 ID（示例：.../avatars/3-xxxx.jpg → 3）
   const parseAvatarUserId = (url?: string): number | undefined => {
     if (!url) return undefined;
@@ -146,55 +138,6 @@ const CourseDetailPage = () => {
     setPreviewIndex((i) => (i + 1) % detail.images.length);
   };
 
-  // 启动 RAG 流式问答
-  const startRag = () => {
-    if (!id) return;
-    const q = ragQuestion.trim();
-    if (!q) return;
-    if (detail && detail.visible !== "public") {
-      setRagError("仅公开知文支持问答");
-      return;
-    }
-    setRagError(null);
-    setRagAnswer("");
-    // 关闭之前的连接
-    if (ragESRef.current) {
-      try { ragESRef.current.close(); } catch {}
-      ragESRef.current = null;
-    }
-    const url = `/api/v1/knowposts/${id}/qa/stream?question=${encodeURIComponent(q)}&topK=${ragTopK}&maxTokens=${ragMaxTokens}`;
-    const es = new EventSource(url);
-    ragESRef.current = es;
-    setRagLoading(true);
-    es.onmessage = (e) => {
-      setRagAnswer((prev) => prev + (e.data ?? ""));
-    };
-    es.onerror = () => {
-      setRagLoading(false);
-      // 不展示“连接中断或后端异常”，静默关闭连接
-      try { es.close(); } catch {}
-      ragESRef.current = null;
-    };
-  };
-
-  const stopRag = () => {
-    if (ragESRef.current) {
-      try { ragESRef.current.close(); } catch {}
-      ragESRef.current = null;
-    }
-    setRagLoading(false);
-  };
-
-  useEffect(() => {
-    return () => {
-      // 页面卸载时关闭 SSE
-      if (ragESRef.current) {
-        try { ragESRef.current.close(); } catch {}
-        ragESRef.current = null;
-      }
-    };
-  }, []);
-
   return (
     <AppLayout
       header={
@@ -282,8 +225,7 @@ const CourseDetailPage = () => {
 
         <SectionHeader title="内容正文" subtitle="" />
 
-        <div className={styles.contentRow}>
-          <div className={styles.contentMain}>
+        <div className={styles.contentMain}>
             <div className={`${styles.body} ${styles.markdown}`}>
               {contentText ? (
                 <ReactMarkdown
@@ -307,60 +249,6 @@ const CourseDetailPage = () => {
               <div style={{ color: "var(--color-danger)" }}>{contentError} {detail?.contentUrl ? (<a href={detail.contentUrl} target="_blank" rel="noreferrer">查看原文</a>) : null}</div>
             ) : null}
           </div>
-
-          <aside className={styles.ragPanel}>
-            <div className={styles.ragBody}>
-              <textarea
-                className={styles.ragTextarea}
-                placeholder="围绕本知文提问，例如：这篇知文的核心观点是什么？"
-                value={ragQuestion}
-                onChange={(e) => setRagQuestion(e.target.value)}
-              />
-              <div className={styles.ragControls}>
-                <button
-                  type="button"
-                  className={`${styles.ragBtn} ${styles.ragBtnPrimary}`}
-                  onClick={startRag}
-                  disabled={ragLoading || !ragQuestion.trim()}
-                >
-                  {ragLoading ? "生成中…" : "发送"}
-                </button>
-                <button type="button" className={`${styles.ragBtn} ${styles.ragBtnGhost}`} onClick={stopRag} disabled={!ragLoading}>
-                  停止
-                </button>
-              </div>
-              <div className={styles.ragHint}>
-                说明：仅“公开”知文支持问答，答案基于当前知文的索引片段实时生成。
-              </div>
-              {ragError ? (
-                <div style={{ color: "var(--color-danger)" }}>{ragError}</div>
-              ) : null}
-              <div className={styles.ragAnswer}>
-                {ragAnswer ? (
-                  <div className={styles.markdown}>
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        a: ({ node, ...props }) => (
-                          <a {...props} target="_blank" rel="noreferrer" />
-                        ),
-                        img: ({ node, ...props }) => (
-                          <img {...props} style={{ maxWidth: "100%", borderRadius: 12 }} />
-                        ),
-                      }}
-                    >
-                      {ragAnswer}
-                    </ReactMarkdown>
-                  </div>
-                ) : (
-                  <div className={styles.ragPlaceholder}>
-                    {ragLoading ? "等待生成…" : "这里将展示答案（支持流式）"}
-                  </div>
-                )}
-              </div>
-            </div>
-          </aside>
-        </div>
 
         <CommentSection postId={id ?? ""} />
 
