@@ -173,3 +173,9 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.rewardHint {
+  color: #e0245e;
+  font-size: 13px;
+  font-weight: 600;
+}

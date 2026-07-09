@@ -3,8 +3,10 @@ import MainHeader from "@/components/layout/MainHeader";
 import SectionHeader from "@/components/common/SectionHeader";
 import TagInput from "@/components/common/TagInput";
 import Select from "@/components/common/Select";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { knowpostService, uploadToPresigned, computeSha256 } from "@/services/knowpostService";
+import { contentRewardService } from "@/services/contentRewardService";
+import type { ContentRewardConfig } from "@/types/contentReward";
 import AuthStatus from "@/features/auth/AuthStatus";
 import { useAuth } from "@/context/AuthContext";
 import { usePublishStatus } from "@/hooks/usePublishStatus";
@@ -13,6 +15,13 @@ import styles from "./CreatePage.module.css";
 const CreatePage = () => {
   const { user, tokens } = useAuth();
   const publishStatus = usePublishStatus(tokens?.accessToken);
+  const [rewardConfig, setRewardConfig] = useState<ContentRewardConfig | null>(null);
+
+  // 拉取奖励配置（带缓存），发布成功后按 config.postAmount 显示 "+N 积分"
+  useEffect(() => {
+    if (!tokens?.accessToken) return;
+    contentRewardService.config(tokens.accessToken).then(setRewardConfig).catch(() => { /* 静默，不阻塞发布 */ });
+  }, [tokens?.accessToken]);
   const [type, setType] = useState("图文");
   const [tags, setTags] = useState<string[]>([]);
   const [title, setTitle] = useState("");
@@ -385,6 +394,7 @@ const CreatePage = () => {
         {publishStatus.phase === "succeeded" ? (
           <div className={styles.success}>
             发布成功 ✅ <a href={`/post/${postId ?? ""}`}>查看详情</a> · <a href="/profile">我的知文</a> · <a href={`/promotion/${postId ?? ""}`}>推广</a>
+            {rewardConfig?.enabled && rewardConfig.postAmount > 0 ? <span className={styles.rewardHint}> · +{rewardConfig.postAmount} 积分</span> : null}
           </div>
         ) : null}
         {publishStatus.phase === "failed" ? (

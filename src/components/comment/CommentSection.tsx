@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { commentService } from "@/services/commentService";
+import { contentRewardService } from "@/services/contentRewardService";
 import type { CommentItem } from "@/types/comment";
+import type { ContentRewardConfig } from "@/types/contentReward";
 import { ApiError } from "@/services/apiClient";
 import styles from "./CommentSection.module.css";
 
@@ -51,6 +53,19 @@ const CommentSection = ({ postId }: { postId: string }) => {
   const [input, setInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [rewardConfig, setRewardConfig] = useState<ContentRewardConfig | null>(null);
+  const [rewardHint, setRewardHint] = useState<string | null>(null);
+  const rewardHintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 拉取奖励配置（带缓存），评论提交后按 config.commentAmount 显示 "+N 积分"
+  useEffect(() => {
+    if (!accessToken) return;
+    contentRewardService.config(accessToken).then(setRewardConfig).catch(() => { /* 静默 */ });
+  }, [accessToken]);
+
+  useEffect(() => () => {
+    if (rewardHintTimerRef.current !== null) clearTimeout(rewardHintTimerRef.current);
+  }, []);
 
   const loadFirst = useCallback(async (signal?: { cancelled: boolean }) => {
     if (!accessToken) return;
@@ -128,6 +143,14 @@ const CommentSection = ({ postId }: { postId: string }) => {
       if (!mountedRef.current) return;
       setItems(prev => [toOptimistic(resp.pendingCommentId, String(user?.id ?? 0), body), ...prev]);
       setInput("");
+      // 评论提交成功后显示 "+N 积分" 轻提示（1.5s 消失）
+      if (rewardConfig?.enabled && rewardConfig.commentAmount > 0) {
+        setRewardHint(`+${rewardConfig.commentAmount} 积分`);
+        if (rewardHintTimerRef.current !== null) clearTimeout(rewardHintTimerRef.current);
+        rewardHintTimerRef.current = setTimeout(() => {
+          if (mountedRef.current) setRewardHint(null);
+        }, 1500);
+      }
     } catch (e) {
       if (!mountedRef.current) return;
       setSubmitError(e instanceof ApiError ? e.message : "发送失败");
@@ -216,6 +239,7 @@ const CommentSection = ({ postId }: { postId: string }) => {
         />
         <div className={styles.inputFoot}>
           {submitError ? <span className={styles.error}>{submitError}</span> : null}
+          {rewardHint ? <span className={styles.rewardHint}>{rewardHint}</span> : null}
           <button
             className={styles.submitBtn}
             onClick={handleSubmit}
